@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>発酵キッチン｜家事代行レシピ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --text: #1e1a14;
+    --text-light: #5a5048;
+    --accent: #7a4f2e;
+    --accent-light: #c49a6c;
+    --tag-bg: #ede8e0;
+    --border: #d8d0c4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-weight: 400;
+    font-size: 15px;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner { max-width: 600px; margin: 0 auto; }
+  .logo {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+  .logo span {
+    font-size: 12px;
+    color: var(--text-light);
+    display: block;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  main { max-width: 600px; margin: 0 auto; padding: 20px 14px 80px; }
+
+  .filter-section { margin-bottom: 20px; }
+  .filter-label {
+    font-size: 12px;
+    color: var(--text-light);
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+  .chip {
+    padding: 8px 16px;
+    border-radius: 22px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent-light); color: var(--accent); }
+  .chip.active { color: white; font-weight: 500; border-color: transparent; }
+  .chip[data-val="塩麹"].active    { background: #4a7a3a; }
+  .chip[data-val="しょうゆ麹"].active { background: #7a4a1a; }
+  .chip[data-val="味噌"].active    { background: #8a4a10; }
+  .chip[data-val="赤酒"].active    { background: #7a1a1a; }
+  .chip[data-val="甘酒"].active    { background: #5a4a7a; }
+  .chip[data-val="酒粕"].active    { background: #2a5a6a; }
+  .chip[data-val="主食"].active         { background: #3a6a3a; }
+  .chip[data-val="魚おかず"].active     { background: #1a4a7a; }
+  .chip[data-val="肉おかず"].active     { background: #7a1a1a; }
+  .chip[data-val="野菜おかず"].active   { background: #3a6a1a; }
+  .chip[data-val="汁物"].active         { background: #1a5a5a; }
+  .chip[data-val="おやつ・スイーツ"].active { background: #6a1a5a; }
+  .chip[data-val="その他"].active       { background: #3a3a3a; }
+  .chip[data-val="基本調味料"].active   { background: #5a4a1a; }
+
+  .reset-btn {
+    padding: 8px 16px;
+    border-radius: 22px;
+    border: 1.5px dashed var(--border);
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .result-count {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 14px;
+  }
+  .result-count strong { color: var(--accent); font-weight: 500; }
+
+  .recipe-list { display: flex; flex-direction: column; gap: 10px; }
+  .recipe-card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .recipe-card:hover { border-color: var(--accent-light); box-shadow: 0 2px 8px rgba(122,79,46,0.1); }
+  .recipe-card.open { border-color: var(--accent); }
+
+  .card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    flex: 1;
+  }
+  .card-arrow {
+    color: var(--accent);
+    font-size: 14px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .recipe-card.open .card-arrow { transform: rotate(180deg); }
+
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .tag {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-主食         { background: #c8e8c0; color: #0a3a0a; }
+  .tag-魚おかず     { background: #c0d8f0; color: #0a2a5a; }
+  .tag-肉おかず     { background: #f0c8c8; color: #6a0a0a; }
+  .tag-野菜おかず   { background: #c8eca0; color: #1a3a0a; }
+  .tag-汁物         { background: #b8e8e8; color: #0a3a3a; }
+  .tag-おやつ・スイーツ { background: #e8c0e8; color: #4a0a4a; }
+  .tag-その他       { background: #d8d8d8; color: #2a2a2a; }
+  .tag-基本調味料   { background: #e8d8a8; color: #3a2a00; }
+  .tag-cond         { background: #f0dcc0; color: #5a2a00; }
+  .tag-session      { background: var(--tag-bg); color: var(--text-light); }
+
+  .card-detail {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1.5px solid var(--bg);
+  }
+  .recipe-card.open .card-detail { display: block; }
+
+  .detail-section { margin-bottom: 14px; }
+  .detail-title {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .ingredients { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .ingredient-item {
+    font-size: 14px;
+    padding: 6px 10px;
+    background: var(--bg);
+    border-radius: 7px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .ingredient-name { color: var(--text); }
+  .ingredient-amount { color: var(--text-light); white-space: nowrap; }
+
+  .steps { list-style: none; }
+  .steps li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bg);
+    line-height: 1.7;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .step-num {
+    width: 22px; height: 22px; min-width: 22px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  .memo-box {
+    background: #fffbe8;
+    border: 1.5px solid #d8c050;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #3a2a00;
+    line-height: 1.7;
+  }
+
+  .edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text-light);
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .fab {
+    position: fixed;
+    bottom: 24px; right: 16px;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(122,79,46,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 99;
+  }
+  .fab:hover { transform: scale(1.08); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 44px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .modal-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text-light); margin-bottom: 6px; display: block; font-weight: 500; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 15px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea { resize: vertical; min-height: 85px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .condiment-checks { display: flex; flex-wrap: wrap; gap: 7px; }
+  .cond-check {
+    padding: 7px 13px;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--surface);
+    color: var(--text-light);
+    transition: all 0.2s;
+  }
+  .cond-check.checked { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .btn-primary {
+    flex: 1; padding: 13px;
+    background: var(--accent); color: white;
+    border: none; border-radius: 10px;
+    font-size: 15px; font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500; cursor: pointer;
+  }
+  .btn-secondary {
+    padding: 13px 18px;
+    background: transparent; color: var(--text-light);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer;
+  }
+  .btn-danger {
+    padding: 13px 14px;
+    background: transparent; color: #b02020;
+    border: 1.5px solid #f0a0a0; border-radius: 10px;
+    font-size: 13px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer;
+  }
+  .no-result {
+    text-align: center; padding: 48px 20px;
+    color: var(--text-light); font-size: 14px;
+  }
+  .no-result div { font-size: 36px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">発酵キッチン<span>家事代行レシピ｜上級コース</span></div>
+  </div>
+</header>
+<main>
+  <div class="filter-section">
+    <div class="filter-label">調味料で絞り込む</div>
+    <div class="filter-row" id="condimentFilters"></div>
+  </div>
+  <div class="filter-section">
+    <div class="filter-label">ジャンルで絞り込む</div>
+    <div class="filter-row" id="genreFilters"></div>
+    <button class="reset-btn" onclick="resetFilters()">× フィルターをリセット</button>
+  </div>
+  <div class="result-count" id="resultCount"></div>
+  <div class="recipe-list" id="recipeList"></div>
+</main>
+<button class="fab" onclick="openAddModal()">＋</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">レシピを追加</div>
+    <div class="form-group">
+      <label class="form-label">料理名 ＊</label>
+      <input class="form-input" id="f_name" placeholder="例：塩麹チキン" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ジャンル ＊</label>
+        <select class="form-select" id="f_genre">
+          <option value="主食">主食</option>
+          <option value="魚おかず">魚おかず</option>
+          <option value="肉おかず">肉おかず</option>
+          <option value="野菜おかず">野菜おかず</option>
+          <option value="汁物">汁物</option>
+          <option value="おやつ・スイーツ">おやつ・スイーツ</option>
+          <option value="その他">その他</option>
+          <option value="基本調味料">基本調味料</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">回</label>
+        <input class="form-input" id="f_session" placeholder="例：第1回" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">使用調味料</label>
+      <div class="condiment-checks" id="condimentChecks"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">材料（1行に「材料名　分量」）</label>
+      <textarea class="form-textarea" id="f_ingredients" placeholder="例：&#10;鶏もも肉 300g&#10;塩麹 大さじ1"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">作り方（1行に1ステップ）</label>
+      <textarea class="form-textarea" id="f_steps" placeholder="例：&#10;鶏肉に塩麹を塗り30分置く&#10;フライパンで中火で焼く"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">メモ・ポイント</label>
+      <textarea class="form-textarea" id="f_memo" placeholder="保存方法など" style="min-height:65px"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModalDirect()">キャンセル</button>
+      <button class="btn-danger" id="deleteBtn" onclick="deleteRecipe()" style="display:none">削除</button>
+      <button class="btn-primary" onclick="saveRecipe()">保存する</button>
+    </div>
+  </div>
+</div>
+<script>
+const CONDIMENTS = ['塩麹','しょうゆ麹','味噌','赤酒','甘酒','酒粕'];
+const GENRES = ['主食','魚おかず','肉おかず','野菜おかず','汁物','おやつ・スイーツ','その他','基本調味料'];
+const initialRecipes = [
+  // 第1回
+  { id:1, name:'巻き寿司（酢飯）', genre:'主食', condiments:['赤酒','塩麹'], session:'第1回',
+    ingredients:[['米','3合'],['赤酒','150cc'],['酢','50cc'],['塩麹','小さじ1'],['海苔','4枚']],
+    steps:['ご飯を通常より少し硬めに炊く（水100mlほど減らす）','鍋にAを入れ100ccになるまで煮詰める','1と2を合わせしゃもじで切るように馴染ませる。乾燥しないよう濡れ布巾を置いておく'],
+    memo:'酢は糖の吸収を減らす効果あり'},
+  { id:2, name:'卵焼き', genre:'その他', condiments:['塩麹','赤酒'], session:'第1回',
+    ingredients:[['卵','3個'],['はんぺん','1枚（たら50g）'],['塩麹','小さじ1'],['赤酒','大さじ2']],
+    steps:['フードプロセッサーに全ての材料を入れ混ぜ合わせる','フライパンに油（分量外）を引き3を入れ蓋をして弱火で20分焼く','20分経ったら裏返し1分ほど焼く'],
+    memo:'巻き簾で巻けば伊達巻に。19cmフライパン使用'},
+  { id:3, name:'干瓢煮', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第1回',
+    ingredients:[['干瓢','20g'],['水','200cc'],['塩麹','小さじ1'],['醤油麹','大さじ1'],['赤酒','大さじ2']],
+    steps:['ボウルに干瓢、水、塩麹を入れ干瓢をよく揉み5分ほど置いておく','鍋に1と赤酒醤油麹を入れ蓋をして中火で15分煮込む','15分経ったら蓋を開け煮汁を飛ばす'],
+    memo:'醤油麹大さじ1：赤酒大さじ2の比率'},
+  { id:4, name:'魚の醤油漬け', genre:'魚おかず', condiments:['しょうゆ麹','赤酒'], session:'第1回',
+    ingredients:[['お好みの魚','200g'],['醤油麹','大さじ1'],['赤酒','大さじ1']],
+    steps:['4等分に切り赤酒醤油麹に漬けておく'],
+    memo:'赤酒は煮切るとよい。1日以上漬けるとアルコールは抜ける'},
+  { id:5, name:'小松菜お浸し', genre:'野菜おかず', condiments:['しょうゆ麹','赤酒'], session:'第1回',
+    ingredients:[['小松菜','1袋'],['醤油麹','大さじ1'],['赤酒','大さじ1']],
+    steps:['小松菜を2分蒸し煮したらよく水を切り赤酒醤油麹に漬けておく'],
+    memo:''},
+  { id:6, name:'いわしのつみれ汁', genre:'汁物', condiments:['塩麹','味噌','赤酒'], session:'第1回',
+    ingredients:[['鰯','4〜5匹'],['塩麹','小さじ1'],['生姜','1かけ（すりおろし）'],['人参','1/2本'],['白葱','1本'],['こんにゃく','1/2枚'],['きのこ','100g'],['味噌','大さじ4'],['水','600cc']],
+    steps:['いわしの内臓と背骨を取り流水でよく洗い水分を拭き取る（酢水で洗うと臭みが取れる）','フードプロセッサーに1、塩麹、生姜を入れ攪拌する','鍋に水を入れ沸騰させ、2をだんご状にしながら入れる。3分程茹でたら一旦取り出す','3の出し汁に味噌以外の全ての材料を入れ火が通ったら3のだんごを戻す','お椀に注ぎ味噌を乗せる'],
+    memo:'塩麹で臭み消しと旨味だし'},
+  { id:7, name:'なめらか塩麹豆腐', genre:'その他', condiments:['塩麹'], session:'第1回',
+    ingredients:[['豆乳','400cc'],['にがり','小さじ1'],['塩麹','お好み（上にのせる）']],
+    steps:['耐熱容器に豆乳とにがりを入れゆっくり混ぜる','鍋に水（分量外）を入れ1を並べ蓋をして火をつける。沸騰し始めたら中火にして10分湯煎蒸しする','食べる直前に塩麹を乗せる'],
+    memo:'容器の1cm位の量の湯水'},
+  { id:8, name:'酢ごぼう', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第1回',
+    ingredients:[['牛蒡','1本'],['塩麹','少々'],['醤油麹','大さじ1'],['赤酒','大さじ1'],['酢','大さじ1'],['すりごま','大さじ2']],
+    steps:['牛蒡を3cm幅に切り更に縦半分に切る','鍋に水（分量外）と塩麹と牛蒡を入れ中火で8分蒸し煮する','全ての材料を合わせ味を馴染ませる'],
+    memo:'アルシアニン・抗酸化作用。えぐみが取れる'},
+  { id:9, name:'赤酒あんこ', genre:'おやつ・スイーツ', condiments:['塩麹','赤酒'], session:'第1回',
+    ingredients:[['小豆','100g'],['水','300cc'],['塩麹','小さじ1'],['赤酒','50cc'],['甜菜糖','50g']],
+    steps:['圧力鍋に水と小豆、塩麹を入れ25分煮込む','赤酒と甜菜糖を加え中火にかけとろみがつくまで水分を飛ばす'],
+    memo:'赤酒入れない時は小豆と同量の水'},
+  { id:10, name:'黒豆煮', genre:'おやつ・スイーツ', condiments:['しょうゆ麹','赤酒'], session:'第1回',
+    ingredients:[['黒豆','100g'],['水','300cc'],['醤油麹','大さじ1'],['甜菜糖','50g'],['赤酒','100cc']],
+    steps:['圧力鍋にAを入れ甜菜糖が溶けるまで中火にかける','甜菜糖が溶けたら黒豆を加え一晩置いておく','2に赤酒を加え強火にかけ圧がかかったら弱火で15分煮込む','黒豆を取り出し煮汁を強火で3〜5分煮詰める','黒豆と煮汁を容器に入れ粗熱が取れたら冷蔵庫で馴染ませる'],
+    memo:'1週間位かけるのがベスト'},
+  { id:11, name:'黒豆大福', genre:'おやつ・スイーツ', condiments:['赤酒'], session:'第1回',
+    ingredients:[['米粉','40g'],['白玉粉','40g'],['水','120cc'],['黒豆煮','20個（4等分）'],['赤酒あんこ','150g（4等分）']],
+    steps:['米粉、白玉粉、水を耐熱容器に入れよく溶かす','耐熱容器に蓋をしてレンジで2分加熱したらよく練る','更にレンジで1分加熱し都度よく練る','3回ほど繰り返し米粉（分量外）を振ったバットに入れ4等分する','手に米粉を付け餅をのばし、黒豆煮と赤酒あんこを入れ丸める'],
+    memo:''},
+
+  // 第2回
+  { id:12, name:'桜鯛めし', genre:'主食', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第2回',
+    ingredients:[['鯛切り身','2切れ'],['塩麹','大さじ1'],['米','2合'],['水','350cc'],['醤油麹','大さじ1'],['赤酒','大さじ1'],['だし昆布','2枚'],['三つ葉','適量']],
+    steps:['桜鯛に塩麹を塗り冷蔵庫で半日〜一晩寝かせる','ボウルにAを入れ30分置き、直前に昆布を取る','米を洗い水を切ったら炊飯器に米→2→昆布→1の順に置き通常モードで炊飯する','桜鯛と昆布を取り出す。桜鯛の身をほぐしご飯に混ぜ込む','三つ葉を刻み4に混ぜ込み茶碗に盛り付け、三つ葉を散らす'],
+    memo:'普通より少し水な目で'},
+  { id:13, name:'鯛の昆布巻き', genre:'魚おかず', condiments:['塩麹'], session:'第2回',
+    ingredients:[['昆布','2枚'],['鯛の刺身','100g'],['塩麹','小さじ1'],['米酢','小さじ1']],
+    steps:['鯛の刺身にAを塗り込む','柔らかく煮た昆布に1を並べ巻き一口大に切る','一口大に切る'],
+    memo:'一晩おくともっとおいしい'},
+  { id:14, name:'桜蓮根', genre:'野菜おかず', condiments:['赤酒'], session:'第2回',
+    ingredients:[['蓮根','50g'],['梅酢','50cc'],['赤酒','大さじ1']],
+    steps:['蓮根を薄切りし沸騰した鍋で1分湯でる','梅酢と赤酒を中火で1分煮詰める','1と2を合わせ漬けておく'],
+    memo:'1晩おくといい。花蓮根としておせちにも'},
+  { id:15, name:'春がんもどき', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹'], session:'第2回',
+    ingredients:[['木綿豆腐','1丁'],['塩麹A','大さじ1'],['ひじき','100g'],['スナップえんどう','5本'],['塩麹B','小さじ1'],['米粉','大さじ4'],['揚げ油','適量'],['醤油麹','お好み'],['おろし生姜','お好み']],
+    steps:['木綿豆腐に塩麹Aを塗り込み重石を乗せて一晩水を切る','ボウルに1を入れよく練り、ひじき、スナップえんどう、塩麹B、米粉を加え更に練る','8等分にし160〜170度の油できつね色になるまで揚げる'],
+    memo:'デトックスレシピ。揚げずに焼いてもOK'},
+  { id:16, name:'春野菜味噌汁', genre:'汁物', condiments:['塩麹','味噌'], session:'第2回',
+    ingredients:[['春キャベツ','2枚（ざく切り）'],['新玉ねぎ','1個（スライス）'],['生姜','1かけ（千切り）'],['いりこ粉末','大さじ1'],['塩麹','小さじ2'],['味噌','大さじ3'],['水','100cc+200cc'],['豆乳','200cc'],['黒ごま','適量（直前に擦る）']],
+    steps:['鍋に水100ccといりこ粉末、春野菜、塩麹を入れ蓋をして中火で5分蒸し煮する','水200cc、豆乳と味噌で味を整える','器に盛り黒ごまを振る'],
+    memo:'デトックスレシピ'},
+  { id:17, name:'蛍烏賊とひともじの酢味噌和え', genre:'魚おかず', condiments:['味噌','甘酒'], session:'第2回',
+    ingredients:[['ほたるいか','100g'],['ひともじ','1束'],['味噌','大さじ1'],['米酢','大さじ1'],['甘酒','大さじ2']],
+    steps:['Aを合わせておく','ほたるいかの目と背骨を取りさっと茹でる','ひともじをさっと茹でぐるぐる巻く','全ての材料を皿に盛り付ける'],
+    memo:'ドレッシングでもできる'},
+  { id:18, name:'赤酒あんこ（濾さないver.）', genre:'おやつ・スイーツ', condiments:['赤酒'], session:'第2回',
+    ingredients:[['小豆','100g'],['水','300cc（3倍）'],['赤酒','50cc（半分）'],['甜菜糖','50g']],
+    steps:['圧力鍋に水と小豆を入れ火にかける。圧がかかったら弱火に25分煮込む','1に赤酒と甜菜糖を加え中火にかけながらブレンダーでとろみまで水分を飛ばす','冷蔵庫で冷やす'],
+    memo:'冷凍OK'},
+  { id:19, name:'桜餅', genre:'おやつ・スイーツ', condiments:['甘酒','赤酒'], session:'第2回',
+    ingredients:[['餅米','2合'],['水','2カップ'],['甘酒','100g'],['ビーツ粉末','小さじ1/3'],['赤酒あんこ','20g×8個'],['桜の葉','8枚']],
+    steps:['餅米をさっと洗い水を加え一晩水に浸す','圧力鍋に1と甘酒を入れ火にかけ、圧がかかったら弱火で4分炊く','ビーツ粉末を加え、しゃもじで馴染ませながら全体を潰す','手に水を軽く付け8等分にした3で赤酒あんこを包み桜の葉で包む'],
+    memo:'桜の葉は塩が効いているので塩抜きをしっかりする。冷凍で保存OK'},
+
+  // 第3回
+  { id:20, name:'自家製白だし', genre:'基本調味料', condiments:['赤酒'], session:'基本調味料',
+    ingredients:[['鰹節荒削り','50g'],['昆布','10cm角1枚'],['干し椎茸','4個'],['薄口醤油','300cc'],['赤酒','300cc'],['塩（みりん）','小さじ1']],
+    steps:['鰹節以外の材料を全て入れ弱火で20分煮詰める','鰹節を加え余熱で5分置きザルで濾す'],
+    memo:'保存期間：密閉容器に入れ冷蔵庫で2ヶ月。そのまま飲んでもいい'},
+  { id:21, name:'きびなごの南蛮漬け', genre:'魚おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第3回',
+    ingredients:[['きびなご','300g'],['塩麹','小さじ1（臭味消し）'],['人参','1/2本（千切り）'],['玉ねぎ','1/2個（スライス）'],['ピーマン','2個（千切り）'],['醤油麹','大さじ3'],['酢','大さじ3'],['赤酒','大さじ6'],['鷹の爪','1本'],['米粉','適量'],['油','適量']],
+    steps:['きびなごに塩麹を軽く塗る（時間おかなくていい、馴染ませる程度）','Aを鍋に入れ中火で3分煮詰める','ボウルに切った野菜と2、鷹の爪を入れ全体に馴染ませる','1に米粉を付けフライパンに油を入れ揚げ焼きする','4を3に入れ全体に馴染ませ1時間程置く'],
+    memo:'疲労回復にお酢は必須。夏の常備菜に'},
+  { id:22, name:'かるかん饅頭', genre:'おやつ・スイーツ', condiments:['甘酒'], session:'第3回',
+    ingredients:[['山芋','100g'],['甜菜糖','大さじ1（A）'],['卵白','1個分（B）'],['甜菜糖','大さじ1（B）'],['甘酒','大さじ1（C）'],['水','大さじ2（C）'],['米粉（上新粉）','100g']],
+    steps:['山芋を皮ごとすりおろし、甜菜糖を加えよく混ぜる（A）','ボウルに1と米粉、Cを入れもったりするまでよく混ぜ置いておく','卵白と甜菜糖を入れメレンゲを作る（B）','2と3合わせゴムベラでサクッと混ぜる','型に入れたら蒸し器で15分蒸す'],
+    memo:'甘酒で優しい甘味に。とろけるかるかん'},
+  { id:23, name:'空也蒸し', genre:'その他', condiments:['塩麹'], session:'第3回',
+    ingredients:[['卵','2個'],['絹ごし豆腐','1/4丁'],['塩麹','小さじ1'],['椎茸','2個（スライス）'],['三つ葉','適量'],['水','350cc'],['自家製白だし','大さじ1']],
+    steps:['絹ごし豆腐に塩麹を塗っておく','卵を泡立てないように溶きほぐしAを入れ濾す','全ての材料を4等分に分け器に入れる','鍋底から2cmほどの水と3を入れ蓋をして強火。沸騰したら弱火にして10分湯煎蒸しする'],
+    memo:'白だしない時は塩麹＋昆布水でもOK'},
+  { id:24, name:'わかめとなめこの練りごま和え', genre:'野菜おかず', condiments:['しょうゆ麹'], session:'第3回',
+    ingredients:[['なめこ','1袋'],['わかめ','50g'],['茗荷','1個（千切り）'],['醤油麹','大さじ1'],['酢','大さじ1'],['練りごま','大さじ1'],['一味','適量']],
+    steps:['水を沸騰させた鍋になめこを入れさっと湯がき、しっかり湯を切る','全ての材料をボウルに入れ和える'],
+    memo:'さっとミネラル補給'},
+  { id:25, name:'赤飯', genre:'主食', condiments:['塩麹'], session:'第3回',
+    ingredients:[['もち米','2合'],['ささげまたは小豆','大さじ2'],['水','300cc'],['塩麹','小さじ1'],['黒ごま','適量']],
+    steps:['もち米を洗いざるにあげておく','圧力鍋に小豆と水、塩麹を入れ圧がかかったら弱火で3分煮込む','2に1を入れ再度加熱し圧がかかったら4分炊く','器に盛り付け黒ごまを振る'],
+    memo:'小豆汁は解毒汁。パパっと作れるお赤飯'},
+
+  // 第4回
+  { id:26, name:'夏野菜の煮浸し', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第4回',
+    ingredients:[['茄子','1本'],['苦瓜','1/2本'],['ミニトマト','8個'],['南瓜','1/8個'],['オクラ','8本'],['塩麹','大さじ1'],['ごま油','大さじ2'],['自家製白だし','大さじ3'],['水','300cc'],['おろし生姜','1かけ（仕上げ）']],
+    steps:['夏野菜は食べやすい大きさに切り塩麹を馴染ませる。更にごま油を絡めておく','フライパンに1を入れ火が通るまで中火で蒸し焼きする','Aを鍋に入れ一煮立ちさせる。熱いうちに2を入れた耐熱容器へ入れ染み込ませる','皿に盛り付けおろし生姜を乗せる'],
+    memo:'一晩冷蔵庫で寝かせると更に美味しい'},
+  { id:27, name:'冬瓜と帆立のもずくあん', genre:'魚おかず', condiments:['塩麹','赤酒'], session:'第4回',
+    ingredients:[['冬瓜','1/8個'],['塩麹','大さじ1'],['帆立貝柱','4個'],['もずく','50g'],['赤酒','大さじ1'],['水','100cc・200cc'],['水溶き片栗粉','水50cc・片栗粉大さじ1'],['梅','大1粒']],
+    steps:['帆立貝柱に塩麹を馴染ませる','冬瓜の皮と綿と取り一口大に切る。切れ目を入れると味が馴染む','鍋に水100ccと1を入れ中火で3分蒸し煮したら一旦取り出し、細かくほぐし鍋に戻す','3に2と水200cc、もずく、赤酒を入れ中火で10分煮込む','水溶き片栗粉でとろみをつける','器に盛り付けたたいた梅を乗せる'],
+    memo:'旬の食材でデトックス。代わりに大根やかぶでも'},
+  { id:28, name:'枝豆と蛸のおこわ', genre:'主食', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第4回',
+    ingredients:[['蛸','150g'],['醤油麹','大さじ1（A）'],['赤酒','大さじ1（A）'],['枝豆','200g'],['塩麹','大さじ1（B）'],['水','400cc（B）'],['餅米','3合'],['茗荷','1個']],
+    steps:['蛸を好みの大きさに切りAに漬けておく（30分程度）','鍋に枝豆とBを入れ5分茹でる','圧力鍋に餅米と2の茹で汁、1を入れ中強火を付ける。圧がかかったら弱火で4分加熱する','2の枝豆を混ぜ合わせ、器に盛り付けたら刻んだ茗荷を乗せる'],
+    memo:'夏の彩りを食卓に。おもてなしにも'},
+  { id:29, name:'辛子蓮根', genre:'野菜おかず', condiments:['塩麹','味噌','甘酒'], session:'第4回',
+    ingredients:[['蓮根','200g'],['塩麹','小さじ1'],['粉辛子','小さじ2'],['味噌','50g（A）'],['甘酒','50g（A）'],['米粉','30g（B）'],['水','30g（B）'],['うこん（ターメリック）','小さじ1/2（B）'],['揚げ油','適量']],
+    steps:['鍋に水（100cc程度）と塩麹、蓮根を入れ蓋をして沸騰したら中火で5分蒸し煮しそのまま粗熱を取る','1の水分をよく取りAを蓮根の穴に詰める','Bを絡め170度の油で3分揚げる。竹串を使うと揚げやすい'],
+    memo:'郷土料理を食卓に。おせちにも'},
+  { id:30, name:'赤酒葛餅', genre:'おやつ・スイーツ', condiments:['赤酒'], session:'第4回',
+    ingredients:[['葛粉','40g'],['赤酒','200cc'],['水','100cc']],
+    steps:['赤酒を中強火で3分煮切る','葛粉と水を混ぜ合わせておく','1に2を入れ中火にかけ、鍋底が焦げないようにヘラでゆっくり混ぜる','全体が透明になってきたら弱火にして2分ほどよく練る','バットに移し冷やす'],
+    memo:'かっこんとうと同じ発汗作用。本くず粉'},
+
+  // 第5回
+  { id:31, name:'鮭といくらの親子丼', genre:'主食', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第5回',
+    ingredients:[['秋鮭','3切れ（約300g）'],['塩麹','大さじ1'],['水','100cc'],['赤酒','大さじ3（A）'],['醤油麹','大さじ1.5（A）'],['米','3合'],['水','400cc'],['いくら','適量'],['三つ葉','適量']],
+    steps:['秋鮭に塩麹を塗って置いておく（30分程度）','鍋に1とAを入れ蓋をして沸騰したら弱火で5分蒸し煮する','粗熱が取れたら秋鮭を取り出し米と水を加え炊飯する','器にご飯、秋鮭、いくら、三つ葉を乗せる'],
+    memo:'Aの残った蒸し汁を炊飯水に入れて'},
+  { id:32, name:'南関揚げの巻き煮', genre:'肉おかず', condiments:['塩麹','味噌','赤酒','しょうゆ麹'], session:'第5回',
+    ingredients:[['鶏むね肉','150g'],['塩麹','大さじ1/2（A）'],['味噌','大さじ1/2（A）'],['白ごま','大さじ1（A）'],['小松菜（葉の部分）','1袋'],['南関揚げ','6枚'],['赤酒','50cc'],['水','150cc'],['醤油麹','大さじ1'],['戻し昆布','1枚']],
+    steps:['フードプロセッサーにAを入れ攪拌し、昆布を水に浸け30分ほど置いておく','小松菜を軽く湯通し、南関揚げは油抜きし、昆布は結ぶ','小松菜、1をそれぞれ南関揚げで巻き竹串でなどで固定する','鍋に全ての材料を入れ蓋をして中火で10分蒸し煮する。途中、表と裏を返すとよい','粗熱が取れたら食べやすい大きさに切る'],
+    memo:'おせちを日常に。卵焼き器・弱火で20分位'},
+  { id:33, name:'秋の具沢山お吸い物', genre:'汁物', condiments:['塩麹','味噌','赤酒'], session:'第5回',
+    ingredients:[['昆布','1枚（A）'],['干し椎茸','4個（A）'],['水','800cc（A）'],['牛蒡','1本'],['蒟蒻','100g'],['蓮根','50g'],['人参','1本'],['小松菜','1/2袋'],['生姜','1かけ'],['鶏むね肉','150g（B）'],['塩麹','大さじ1/2（B）'],['味噌','大さじ1/2（B）'],['白ごま','大さじ1（B）'],['塩麹','大さじ1'],['赤酒','大さじ1'],['黒胡椒','仕上げ']],
+    steps:['フードプロセッサーにBを入れ攪拌し30分ほど置いておく','ボウルにAを入れ30分ほど置いておく','2の昆布を取り出し干し椎茸を薄切りにする。1を団子にする','全ての材料を鍋に入れ鶏団子に火が通るまで中火で煮込む','仕上げに黒胡椒をふる'],
+    memo:'だし昆布→赤酒・しょうゆ麹でつくだ煮に'},
+  { id:34, name:'秋烏賊とわかめの酒粕和え', genre:'魚おかず', condiments:['塩麹','酒粕'], session:'第5回',
+    ingredients:[['秋烏賊','100〜150g'],['わかめ','50g'],['塩麹','大さじ1/2'],['酒粕','大さじ1/2'],['柚子胡椒','少々']],
+    steps:['塩麹、酒粕、柚子胡椒を混ぜ合わせておく','食べやすい大きさに切った秋烏賊とわかめを1と和える'],
+    memo:'秋烏賊をボイルする場合は、事前に塩麹（分量外）を少し揉み込むと硬くなりにくい'},
+  { id:35, name:'ヘルシーいきなり団子', genre:'おやつ・スイーツ', condiments:['塩麹','赤酒'], session:'第5回',
+    ingredients:[['さつま芋','中1本（約200g）'],['赤酒あんこ','150g'],['米粉','100g'],['絹ごし豆腐','100g'],['きび砂糖','大さじ1'],['塩麹','少々']],
+    steps:['さつま芋は1.5cm幅に切り塩麹を軽く塗っておく','1に赤酒あんこを乗せる','ボウルに絹ごし豆腐、米粉、きび砂糖を入れ粉っぽさがなくなるまでよく練り一まとめにする','2を3で包む','蒸し器に入れ強火で20分蒸す'],
+    memo:'乾燥しない様にすぐラップに包む'},
+
+  // 第6回（おせち）
+  { id:36, name:'煮しめ（三の重）', genre:'肉おかず', condiments:['塩麹','赤酒','しょうゆ麹'], session:'第6回',
+    ingredients:[['鶏もも肉','200g（一口大）'],['塩麹','大さじ1（A）'],['赤酒','大さじ1（A）'],['干し椎茸','8個'],['結び昆布','8本'],['大根','10cm（拍子切り）'],['里芋','8個'],['人参','2本（花型）'],['蓮根','1本（花型）'],['蒟蒻','1/2枚（手綱型）'],['絹さや','5枚'],['醤油麹','大さじ2（B）'],['赤酒','100cc（B）']],
+    steps:['Aを合わせておく','1と絹さや以外の材料をBと絡めて鍋に入れる。中強火で20分蒸し煮する。途中10分経ったら具材を一混ぜする','絹さやを加え30分程度置いておく'],
+    memo:'2〜3日はもつ。こげやすいので火かげん注意'},
+  { id:37, name:'芋きんとん（一の重）', genre:'おやつ・スイーツ', condiments:['塩麹','赤酒'], session:'第6回',
+    ingredients:[['さつま芋','中1本'],['赤酒','200cc'],['塩麹','少々'],['くちなし','2個（赤酒に漬けておく）']],
+    steps:['さつま芋を一口大に切る','全ての材料を鍋に入れ蓋をして沸騰したら弱火で15分蒸し煮する','くちなしを取り出しフードプロセッサーで滑らかにする'],
+    memo:'くちなしレシピをたくさん作れる'},
+  { id:38, name:'えびの旨蒸し煮（二の重）', genre:'魚おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第6回',
+    ingredients:[['海老','8匹'],['塩麹','小さじ2'],['醤油麹','大さじ1（A）'],['赤酒','大さじ3（A）'],['だし汁','大さじ2（水でもOK）']],
+    steps:['海老をよく洗いAを絡めておく','鍋に全ての材料を入れ蓋をする。一煮立ちさせたら火を止め余熱で火を通す'],
+    memo:'煮すぎると固くなる。常備菜に'},
+  { id:39, name:'田作り（一の重）', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第6回',
+    ingredients:[['いりこ','50g'],['くるみ','30g'],['塩麹','小さじ1（A）'],['醤油麹','小さじ1（A）'],['赤酒','大さじ2（A）'],['白ごま','適量']],
+    steps:['Aを合わせておく','いりことくるみを耐熱容器に入れレンジで1分加熱する','2にAを加え全体に馴染ませたら蓋をして1分30秒加熱する（600W）','蓋を取り白ごまを振る'],
+    memo:'いつものおやつに'},
+  { id:40, name:'紅白なます（一の重）', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第6回',
+    ingredients:[['大根','1/6本'],['人参','1/4本'],['塩麹','小さじ2'],['赤酒','100cc（A）'],['塩麹','大さじ1（A）'],['醤油麹','大さじ1/2（A）'],['ゆず果汁','1個分（酢でも代用可）']],
+    steps:['大根、人参をそれぞれ千切りし塩麹揉みをして水気を切る','鍋にAを入れ中強火で3分煮詰める','容器に全ての材料を入れ30分ほど置いておく'],
+    memo:'菊花かぶも同じ調味料で◎'},
+  { id:41, name:'数の子（二の重）', genre:'魚おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第6回',
+    ingredients:[['数の子','10本'],['だし汁','150cc'],['塩麹','大さじ1（A）'],['醤油麹','大さじ1（A）'],['赤酒','大さじ3（A）'],['かつお節','2g'],['かつお節','食べる時にひとつまみ']],
+    steps:['数の子を1日水につけ塩抜きする（水を2〜3度入れ替える）','鍋にAを入れ中強火で3分煮出し、火を止め鰹節を入れる','2が冷めたら1を入れ1日置いておく'],
+    memo:'2〜3日かけて塩抜きする場合は1日1回水を入れ替える'},
+
+];
+
+let recipes = JSON.parse(localStorage.getItem('fermentRecipes') || 'null') || initialRecipes;
+let filterCondiment = null;
+let filterGenre = null;
+let editingId = null;
+
+function saveToStorage() {
+  localStorage.setItem('fermentRecipes', JSON.stringify(recipes));
+}
+
+function renderFilters() {
+  const cf = document.getElementById('condimentFilters');
+  cf.innerHTML = CONDIMENTS.map(c => 
+    `<button class="chip ${filterCondiment===c?'active':''}" data-type="condiment" data-val="${c}" onclick="toggleCondiment('${c}')">${c}</button>`
+  ).join('');
+
+  const gf = document.getElementById('genreFilters');
+  gf.innerHTML = GENRES.map(g => 
+    `<button class="chip ${filterGenre===g?'active':''}" data-type="genre" data-val="${g}" onclick="toggleGenre('${g}')">${g}</button>`
+  ).join('');
+}
+
+function toggleCondiment(val) {
+  filterCondiment = filterCondiment === val ? null : val;
+  renderAll();
+}
+function toggleGenre(val) {
+  filterGenre = filterGenre === val ? null : val;
+  renderAll();
+}
+function resetFilters() {
+  filterCondiment = null;
+  filterGenre = null;
+  renderAll();
+}
+
+function getFiltered() {
+  return recipes.filter(r => {
+    if (filterCondiment && !r.condiments.includes(filterCondiment)) return false;
+    if (filterGenre && r.genre !== filterGenre) return false;
+    return true;
+  });
+}
+
+function genreTagClass(genre) {
+  return 'tag-' + genre;
+}
+
+function renderAll() {
+  renderFilters();
+  const filtered = getFiltered();
+  const list = document.getElementById('recipeList');
+  const count = document.getElementById('resultCount');
+
+  count.innerHTML = `<strong>${filtered.length}</strong> 品表示中（全${recipes.length}品）`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="no-result"><div>🍽</div>該当するレシピがありません</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => `
+    <div class="recipe-card" id="card-${r.id}" onclick="toggleCard(${r.id})">
+      <div class="card-header">
+        <div class="card-title">${r.name}</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-tags">
+        <span class="tag ${genreTagClass(r.genre)}">${r.genre}</span>
+        ${r.condiments.map(c => `<span class="tag tag-cond">${c}</span>`).join('')}
+        <span class="tag tag-session">${r.session}</span>
+      </div>
+      <div class="card-detail">
+        ${r.ingredients && r.ingredients.length > 0 ? `
+        <div class="detail-section">
+          <div class="detail-title">【材料】</div>
+          <div class="ingredients">
+            ${r.ingredients.map(([name, amount]) => `
+              <div class="ingredient-item">
+                <span class="ingredient-name">${name}</span>
+                <span class="ingredient-amount">${amount}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>` : ''}
+        ${r.steps && r.steps.length > 0 ? `
+        <div class="detail-section">
+          <div class="detail-title">【作り方】</div>
+          <ol class="steps">
+            ${r.steps.map((s, i) => `
+              <li><span class="step-num">${i+1}</span><span>${s}</span></li>
+            `).join('')}
+          </ol>
+        </div>` : ''}
+        ${r.memo ? `
+        <div class="memo-box">💡 ${r.memo}</div>` : ''}
+        <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${r.id})">✏️ 編集・修正</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('open');
+}
+
+// モーダル
+function buildCondimentChecks(selected) {
+  const container = document.getElementById('condimentChecks');
+  container.innerHTML = CONDIMENTS.map(c => 
+    `<span class="cond-check ${selected.includes(c)?'checked':''}" onclick="toggleCondCheck(this,'${c}')">${c}</span>`
+  ).join('');
+}
+
+function toggleCondCheck(el, val) {
+  el.classList.toggle('checked');
+}
+
+function getCheckedCondiments() {
+  return [...document.querySelectorAll('.cond-check.checked')].map(el => el.textContent);
+}
+
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'レシピを追加';
+  document.getElementById('f_name').value = '';
+  document.getElementById('f_genre').value = '主食';
+  document.getElementById('f_session').value = '';
+  document.getElementById('f_ingredients').value = '';
+  document.getElementById('f_steps').value = '';
+  document.getElementById('f_memo').value = '';
+  document.getElementById('deleteBtn').style.display = 'none';
+  buildCondimentChecks([]);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openEditModal(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'レシピを編集';
+  document.getElementById('f_name').value = r.name;
+  document.getElementById('f_genre').value = r.genre;
+  document.getElementById('f_session').value = r.session || '';
+  document.getElementById('f_ingredients').value = (r.ingredients || []).map(([n,a]) => `${n} ${a}`).join('\n');
+  document.getElementById('f_steps').value = (r.steps || []).join('\n');
+  document.getElementById('f_memo').value = r.memo || '';
+  document.getElementById('deleteBtn').style.display = 'block';
+  buildCondimentChecks(r.condiments || []);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function saveRecipe() {
+  const name = document.getElementById('f_name').value.trim();
+  if (!name) { alert('料理名を入力してください'); return; }
+
+  const ingredientLines = document.getElementById('f_ingredients').value.trim().split('\n').filter(l => l.trim());
+  const ingredients = ingredientLines.map(line => {
+    const parts = line.trim().split(/\s+/);
+    const amount = parts.length > 1 ? parts.slice(1).join(' ') : '';
+    return [parts[0], amount];
+  });
+
+  const steps = document.getElementById('f_steps').value.trim().split('\n').filter(l => l.trim());
+
+  const data = {
+    name,
+    genre: document.getElementById('f_genre').value,
+    session: document.getElementById('f_session').value.trim() || '追加',
+    condiments: getCheckedCondiments(),
+    ingredients,
+    steps,
+    memo: document.getElementById('f_memo').value.trim(),
+  };
+
+  if (editingId) {
+    const idx = recipes.findIndex(x => x.id === editingId);
+    if (idx !== -1) recipes[idx] = { ...recipes[idx], ...data };
+  } else {
+    const maxId = recipes.reduce((m, r) => Math.max(m, r.id), 0);
+    recipes.push({ id: maxId + 1, ...data });
+  }
+
+  saveToStorage();
+  closeModalDirect();
+  renderAll();
+}
+
+function deleteRecipe() {
+  if (!editingId) return;
+  if (!confirm('このレシピを削除しますか？')) return;
+  recipes = recipes.filter(r => r.id !== editingId);
+  saveToStorage();
+  closeModalDirect();
+  renderAll();
+}
+
+renderAll();
+</script>
+</body></html>
