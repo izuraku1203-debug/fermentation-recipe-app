@@ -94,6 +94,11 @@
   .chip[data-val="おやつ・スイーツ"].active { background: #6a1a5a; }
   .chip[data-val="その他"].active       { background: #3a3a3a; }
   .chip[data-val="基本調味料"].active   { background: #5a4a1a; }
+  .chip[data-val="初級"].active    { background: #2a7a5a; }
+  .chip[data-val="中級"].active    { background: #4a6a2a; }
+  .chip[data-val="上級"].active    { background: #5a2a7a; }
+  .chip[data-val="マスター"].active { background: #1a3a7a; }
+  .tag-course { background: #dce8f8; color: #1a2a5a; font-weight: 600; }
 
   .reset-btn {
     padding: 8px 16px;
@@ -359,6 +364,10 @@
 </header>
 <main>
   <div class="filter-section">
+    <div class="filter-label">コースで絞り込む</div>
+    <div class="filter-row" id="courseFilters"></div>
+  </div>
+  <div class="filter-section">
     <div class="filter-label">調味料で絞り込む</div>
     <div class="filter-row" id="condimentFilters"></div>
   </div>
@@ -379,6 +388,15 @@
       <input class="form-input" id="f_name" placeholder="例：塩麹チキン" />
     </div>
     <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">コース ＊</label>
+        <select class="form-select" id="f_course">
+          <option value="初級">初級</option>
+          <option value="中級">中級</option>
+          <option value="上級" selected>上級</option>
+          <option value="マスター">マスター</option>
+        </select>
+      </div>
       <div class="form-group">
         <label class="form-label">ジャンル ＊</label>
         <select class="form-select" id="f_genre">
@@ -423,6 +441,7 @@
 <script>
 const CONDIMENTS = ['塩麹','しょうゆ麹','味噌','赤酒','甘酒','酒粕'];
 const GENRES = ['主食','魚おかず','肉おかず','野菜おかず','汁物','おやつ・スイーツ','その他','基本調味料'];
+const COURSES = ['初級','中級','上級','マスター'];
 const initialRecipes = [
   // 第1回
   { id:1, name:'巻き寿司（酢飯）', genre:'主食', condiments:['赤酒','塩麹'], session:'第1回',
@@ -603,6 +622,8 @@ const initialRecipes = [
 ];
 
 let recipes = JSON.parse(localStorage.getItem('fermentRecipes') || 'null') || initialRecipes;
+recipes = recipes.map(r => ({ course: '上級', ...r }));
+let filterCourse = null;
 let filterCondiment = null;
 let filterGenre = null;
 let editingId = null;
@@ -612,17 +633,26 @@ function saveToStorage() {
 }
 
 function renderFilters() {
+  const kf = document.getElementById('courseFilters');
+  kf.innerHTML = COURSES.map(k =>
+    `<button class="chip ${filterCourse===k?'active':''}" data-type="course" data-val="${k}" onclick="toggleCourse('${k}')">${k}</button>`
+  ).join('');
+
   const cf = document.getElementById('condimentFilters');
-  cf.innerHTML = CONDIMENTS.map(c => 
+  cf.innerHTML = CONDIMENTS.map(c =>
     `<button class="chip ${filterCondiment===c?'active':''}" data-type="condiment" data-val="${c}" onclick="toggleCondiment('${c}')">${c}</button>`
   ).join('');
 
   const gf = document.getElementById('genreFilters');
-  gf.innerHTML = GENRES.map(g => 
+  gf.innerHTML = GENRES.map(g =>
     `<button class="chip ${filterGenre===g?'active':''}" data-type="genre" data-val="${g}" onclick="toggleGenre('${g}')">${g}</button>`
   ).join('');
 }
 
+function toggleCourse(val) {
+  filterCourse = filterCourse === val ? null : val;
+  renderAll();
+}
 function toggleCondiment(val) {
   filterCondiment = filterCondiment === val ? null : val;
   renderAll();
@@ -632,6 +662,7 @@ function toggleGenre(val) {
   renderAll();
 }
 function resetFilters() {
+  filterCourse = null;
   filterCondiment = null;
   filterGenre = null;
   renderAll();
@@ -639,6 +670,7 @@ function resetFilters() {
 
 function getFiltered() {
   return recipes.filter(r => {
+    if (filterCourse && r.course !== filterCourse) return false;
     if (filterCondiment && !r.condiments.includes(filterCondiment)) return false;
     if (filterGenre && r.genre !== filterGenre) return false;
     return true;
@@ -669,6 +701,7 @@ function renderAll() {
         <div class="card-arrow">▼</div>
       </div>
       <div class="card-tags">
+        <span class="tag tag-course">${r.course}</span>
         <span class="tag ${genreTagClass(r.genre)}">${r.genre}</span>
         ${r.condiments.map(c => `<span class="tag tag-cond">${c}</span>`).join('')}
       </div>
@@ -727,6 +760,7 @@ function openAddModal() {
   editingId = null;
   document.getElementById('modalTitle').textContent = 'レシピを追加';
   document.getElementById('f_name').value = '';
+  document.getElementById('f_course').value = '上級';
   document.getElementById('f_genre').value = '主食';
   document.getElementById('f_session').value = '';
   document.getElementById('f_ingredients').value = '';
@@ -743,6 +777,7 @@ function openEditModal(id) {
   editingId = id;
   document.getElementById('modalTitle').textContent = 'レシピを編集';
   document.getElementById('f_name').value = r.name;
+  document.getElementById('f_course').value = r.course || '上級';
   document.getElementById('f_genre').value = r.genre;
   document.getElementById('f_session').value = r.session || '';
   document.getElementById('f_ingredients').value = (r.ingredients || []).map(([n,a]) => `${n} ${a}`).join('\n');
@@ -775,6 +810,7 @@ function saveRecipe() {
 
   const data = {
     name,
+    course: document.getElementById('f_course').value,
     genre: document.getElementById('f_genre').value,
     session: document.getElementById('f_session').value.trim() || '追加',
     condiments: getCheckedCondiments(),
