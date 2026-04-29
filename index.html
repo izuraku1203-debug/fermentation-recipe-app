@@ -744,6 +744,11 @@ const initialRecipes = [
 
 ];
 
+const APP_VERSION = '2';
+if (localStorage.getItem('appVersion') !== APP_VERSION) {
+  localStorage.removeItem('fermentRecipes');
+  localStorage.setItem('appVersion', APP_VERSION);
+}
 let recipes = JSON.parse(localStorage.getItem('fermentRecipes') || 'null') || initialRecipes;
 recipes = recipes.map(r => ({ course: '上級', ...r }));
 let filterCourse = null;
