@@ -46,7 +46,7 @@
     height: 56px;
     border-radius: 50%;
     flex-shrink: 0;
-    border: 2px solid var(--border);
+    border: 1px solid rgba(0,0,0,0.15);
     background: #fff;
     display: flex;
     align-items: center;
@@ -284,6 +284,21 @@
     z-index: 99;
   }
   .fab:hover { transform: scale(1.08); }
+  .admin-toggle {
+    position: fixed;
+    bottom: 24px; left: 16px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.08);
+    color: #aaa;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+  }
 
   .modal-overlay {
     display: none;
@@ -396,7 +411,8 @@
   <div class="result-count" id="resultCount"></div>
   <div class="recipe-list" id="recipeList"></div>
 </main>
-<button class="fab" onclick="openAddModal()">＋</button>
+<button class="fab" id="fabBtn" onclick="openAddModal()" style="display:none">＋</button>
+<button class="admin-toggle" id="adminToggle" onclick="toggleAdmin()" title="管理者">⚙️</button>
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title" id="modalTitle">レシピを追加</div>
@@ -469,7 +485,7 @@ const initialRecipes = [
     ingredients:[['卵','3個'],['はんぺん','1枚（たら50g）'],['塩麹','小さじ1'],['赤酒','大さじ2']],
     steps:['フードプロセッサーに全ての材料を入れ混ぜ合わせる','フライパンに油（分量外）を引き3を入れ蓋をして弱火で20分焼く','20分経ったら裏返し1分ほど焼く'],
     memo:'巻き簾で巻けば伊達巻に。19cmフライパン使用'},
-  { id:3, name:'干瓢煮', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第1回',
+  { id:3, name:'干瓢煮（かんぴょうに）', genre:'野菜おかず', condiments:['塩麹','しょうゆ麹','赤酒'], session:'第1回',
     ingredients:[['干瓢','20g'],['水','200cc'],['塩麹','小さじ1'],['醤油麹','大さじ1'],['赤酒','大さじ2']],
     steps:['ボウルに干瓢、水、塩麹を入れ干瓢をよく揉み5分ほど置いておく','鍋に1と赤酒醤油麹を入れ蓋をして中火で15分煮込む','15分経ったら蓋を開け煮汁を飛ばす'],
     memo:'醤油麹大さじ1：赤酒大さじ2の比率'},
@@ -745,6 +761,27 @@ const initialRecipes = [
 ];
 
 const APP_VERSION = '2';
+const ADMIN_PASSWORD = 'hakko2024';
+let isAdmin = false;
+
+function toggleAdmin() {
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('fabBtn').style.display = 'none';
+    document.getElementById('adminToggle').style.color = '#aaa';
+    renderRecipes();
+  } else {
+    const pw = prompt('管理者パスワードを入力してください');
+    if (pw === ADMIN_PASSWORD) {
+      isAdmin = true;
+      document.getElementById('fabBtn').style.display = 'flex';
+      document.getElementById('adminToggle').style.color = '#7a4f2e';
+      renderRecipes();
+    } else if (pw !== null) {
+      alert('パスワードが違います');
+    }
+  }
+}
 if (localStorage.getItem('appVersion') !== APP_VERSION) {
   localStorage.removeItem('fermentRecipes');
   localStorage.setItem('appVersion', APP_VERSION);
@@ -857,7 +894,7 @@ function renderAll() {
         </div>` : ''}
         ${r.memo ? `
         <div class="memo-box">💡 ${r.memo}</div>` : ''}
-        <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${r.id})">✏️ 編集・修正</button>
+        ${isAdmin ? `<button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${r.id})">✏️ 編集・修正</button>` : ''}
       </div>
     </div>
   `).join('');
