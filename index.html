@@ -411,8 +411,6 @@
   <div class="result-count" id="resultCount"></div>
   <div class="recipe-list" id="recipeList"></div>
 </main>
-<button class="fab" id="fabBtn" onclick="openAddModal()" style="display:none">＋</button>
-<button class="admin-toggle" id="adminToggle" onclick="toggleAdmin()" title="管理者">⚙️</button>
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title" id="modalTitle">レシピを追加</div>
@@ -894,7 +892,6 @@ function renderAll() {
         </div>` : ''}
         ${r.memo ? `
         <div class="memo-box">💡 ${r.memo}</div>` : ''}
-        ${isAdmin ? `<button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${r.id})">✏️ 編集・修正</button>` : ''}
       </div>
     </div>
   `).join('');
