@@ -109,8 +109,8 @@
   .chip[data-val="野菜おかず"].active   { background: #3a6a1a; }
   .chip[data-val="汁物"].active         { background: #1a5a5a; }
   .chip[data-val="おやつ・スイーツ"].active { background: #6a1a5a; }
-  .chip[data-val="その他"].active       { background: #3a3a3a; }
-  .chip[data-val="基本調味料"].active   { background: #5a4a1a; }
+  .chip[data-val="その他(卵、豆腐など）"].active { background: #3a3a3a; }
+  .chip[data-val="調味料、たれ"].active  { background: #5a4a1a; }
   .chip[data-val="初級"].active    { background: #2a7a5a; }
   .chip[data-val="中級"].active    { background: #4a6a2a; }
   .chip[data-val="上級"].active    { background: #5a2a7a; }
@@ -179,8 +179,8 @@
   .tag-野菜おかず   { background: #c8eca0; color: #1a3a0a; }
   .tag-汁物         { background: #b8e8e8; color: #0a3a3a; }
   .tag-おやつ・スイーツ { background: #e8c0e8; color: #4a0a4a; }
-  .tag-その他       { background: #d8d8d8; color: #2a2a2a; }
-  .tag-基本調味料   { background: #e8d8a8; color: #3a2a00; }
+  .tag-sonota     { background: #d8d8d8; color: #2a2a2a; }
+  .tag-seasoning  { background: #e8d8a8; color: #3a2a00; }
   .tag-cond         { background: #f0dcc0; color: #5a2a00; }
   .tag-session      { background: var(--tag-bg); color: var(--text-light); }
 
@@ -1025,7 +1025,7 @@ const initialRecipes = [
 
 ];
 
-const APP_VERSION = '6';
+const APP_VERSION = '7';
 const ADMIN_PASSWORD = 'hakko2026';
 let isAdmin = false;
 
@@ -1108,7 +1108,8 @@ function getFiltered() {
 }
 
 function genreTagClass(genre) {
-  return 'tag-' + genre;
+  const map = { 'その他(卵、豆腐など）': 'tag-sonota', '調味料、たれ': 'tag-seasoning' };
+  return map[genre] || ('tag-' + genre);
 }
 
 function renderAll() {
@@ -1132,7 +1133,7 @@ function renderAll() {
       </div>
       <div class="card-tags">
         <span class="tag tag-course">${r.course}</span>
-        <span class="tag ${genreTagClass(r.genre)}">${r.genre}</span>
+        ${[r.genre].flat().map(g => `<span class="tag ${genreTagClass(g)}">${g}</span>`).join('')}
         ${r.condiments.map(c => `<span class="tag tag-cond">${c}</span>`).join('')}
       </div>
       <div class="card-detail">
