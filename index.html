@@ -214,6 +214,14 @@
   }
   .ingredient-name { color: var(--text); flex: 1; }
   .ingredient-amount { color: var(--text-light); white-space: nowrap; flex-shrink: 0; }
+  .ingredient-section-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--primary);
+    margin-top: 10px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--primary);
+  }
 
   .steps { list-style: none; }
   .steps li {
@@ -708,8 +716,8 @@ const initialRecipes = [
     ingredients:[['里芋','小10個'],['つけあみ','40g（桜エビで代用可）'],['ごま油','大さじ1'],['塩麹','小さじ1']],
     steps:['鍋に50cc程度の水を入れ、里芋を皮付きのまま入れる。蓋をして中火で15分蒸し煮する','フライパンにごま油・つけあみ・塩麹を入れ中火で香りが出るまで炒める','里芋の皮を剥ぎ一口大に切る','里芋を2に加え中火にかけ全体に馴染ませる'],
     memo:'里芋は皮をむかずに皮付きのまま少量の水で蒸し煮にするのがコツ'},
-  { id:56, course:'中級', name:'黒豆とじゃこのサラダ', genre:'野菜おかず', condiments:['塩麹'], session:'第4回',
-    ingredients:[['水菜','1/2袋'],['黒豆（乾燥）','20g'],['ちりめんじゃこ','15g'],['ミニトマト','4個（飾り用）'],['レモン汁','1/2個分'],['ゴールドキウイ','1/2個'],['塩麹','小さじ1'],['オリーブ油','小さじ1'],['黒胡椒','適量']],
+  { id:56, course:'中級', name:'黒豆とじゃこのサラダ', genre:['野菜おかず','調味料、たれ'], condiments:['塩麹'], session:'第4回',
+    ingredients:[['水菜','1/2袋'],['黒豆（乾燥）','20g'],['ちりめんじゃこ','15g'],['ミニトマト','4個（飾り用）'],['【ビタミンCたっぷりドレッシング】',''],['レモン汁','1/2個分'],['ゴールドキウイ','1/2個'],['塩麹','小さじ1'],['オリーブ油','小さじ1'],['黒胡椒','適量']],
     steps:['黒豆をさっと洗い魔法瓶に沸騰したお湯を入れ8時間放置する','ゴールドキウイを細かく刻み、ドレッシングの全ての材料を混ぜ合わせる','ボウルに全ての材料を入れ和える。最後にミニトマトを飾る'],
     memo:''},
   { id:57, course:'中級', name:'あおさの酒粕味噌汁', genre:'汁物', condiments:['味噌','酒粕'], session:'第4回',
@@ -1141,12 +1149,14 @@ function renderAll() {
         <div class="detail-section">
           <div class="detail-title">【材料】</div>
           <div class="ingredients">
-            ${r.ingredients.map(([name, amount]) => `
+            ${r.ingredients.map(([name, amount]) =>
+              !amount && name.startsWith('【') ? `
+              <div class="ingredient-section-label">${name}</div>` : `
               <div class="ingredient-item">
                 <span class="ingredient-name">${name}</span>
                 <span class="ingredient-amount">${amount}</span>
-              </div>
-            `).join('')}
+              </div>`
+            ).join('')}
           </div>
         </div>` : ''}
         ${r.steps && r.steps.length > 0 ? `
